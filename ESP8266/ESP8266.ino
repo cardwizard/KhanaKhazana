@@ -5,6 +5,7 @@
 
 // Load Wi-Fi library
 #include <ESP8266WiFi.h>
+#include <Servo.h>
 
 // Replace with your network credentials
 const char* ssid     = "aadesh";
@@ -15,7 +16,7 @@ WiFiServer server(80);
 
 // Variable to store the HTTP request
 String header;
-
+Servo myservo;
 // Auxiliar variables to store the current output state
 String output5State = "off";
 String output4State = "off";
@@ -30,9 +31,25 @@ unsigned long currentTime = millis();
 unsigned long previousTime = 0; 
 // Define timeout time in milliseconds (example: 2000ms = 2s)
 const long timeoutTime = 2000;
+Servo myservo5;
+Servo myservo4;
+void move_servo(Servo myservo) {
+  int pos;
 
+  for (pos = 0; pos <= 180; pos += 1) { // goes from 0 degrees to 180 degrees
+    // in steps of 1 degree
+    myservo.write(pos);              // tell servo to go to position in variable 'pos'
+    delay(15);                       // waits 15ms for the servo to reach the position
+  }
+  for (pos = 180; pos >= 0; pos -= 1) { // goes from 180 degrees to 0 degrees
+    myservo.write(pos);              // tell servo to go to position in variable 'pos'
+    delay(15);                       // waits 15ms for the servo to reach the position
+  }
+}
 void setup() {
   Serial.begin(115200);
+  myservo5.attach(5);
+  myservo4.attach(4);
   // Initialize the output variables as outputs
   pinMode(output5, OUTPUT);
   pinMode(output4, OUTPUT);
@@ -85,7 +102,7 @@ void loop(){
             if (header.indexOf("GET /5/on") >= 0) {
               Serial.println("GPIO 5 on");
               output5State = "on";
-              digitalWrite(output5, HIGH);
+              move_servo(myservo5);
             } else if (header.indexOf("GET /5/off") >= 0) {
               Serial.println("GPIO 5 off");
               output5State = "off";
@@ -93,7 +110,7 @@ void loop(){
             } else if (header.indexOf("GET /4/on") >= 0) {
               Serial.println("GPIO 4 on");
               output4State = "on";
-              digitalWrite(output4, HIGH);
+              move_servo(myservo4);
             } else if (header.indexOf("GET /4/off") >= 0) {
               Serial.println("GPIO 4 off");
               output4State = "off";
